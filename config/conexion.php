@@ -1,9 +1,9 @@
 <?php
-$host = "localhost";
+$host = "127.0.0.1";
 $puerto = "3306";
-$bd = "sistema_envio";
-$usuario = "root";
-$password = "";
+$bd = "sistema_envios";
+$usuario = "devops";
+$password = "devops123";
 
 try {
     $conexion = new PDO(
