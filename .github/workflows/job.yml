@@ -1,1 +1,133 @@
 
+name: CI PHP Sistema Envios
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+
+  build:
+    name: Build PHP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP
+        run: |
+          sudo apt update
+          sudo apt install -y php php-mysql
+
+      - name: Validar sintaxis PHP
+        run: |
+          find . -name "*.php" \
+          -not -path "./vendor/*" \
+          -print0 | xargs -0 -n1 php -l
+
+      - name: Build OK
+        run: echo "BUILD EXITOSO"
+
+  tests:
+    name: Pruebas integración
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    services:
+      mysql:
+        image: mysql:8.0
+
+        env:
+          MYSQL_ROOT_PASSWORD: root123
+          MYSQL_DATABASE: sistema_envios
+          MYSQL_USER: devops
+          MYSQL_PASSWORD: devops123
+
+        ports:
+          - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot123"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: sistema_envios
+      DB_USER: devops
+      DB_PASSWORD: devops123
+
+    steps:
+
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP y MySQL client
+        run: |
+          sudo apt update
+          sudo apt install -y php php-mysql mysql-client
+
+      - name: Esperar MySQL
+        run: |
+          sleep 15
+
+      - name: Crear estructura BD
+        run: |
+          mysql -h 127.0.0.1 \
+          -u devops \
+          -pdevops123 \
+          < database/database_integration.sql
+
+      - name: Verificar tablas
+        run: |
+          mysql -h 127.0.0.1 \
+          -u devops \
+          -pdevops123 \
+          -e "USE sistema_envios; SHOW TABLES;"
+
+      - name: Test schema
+        run: php test/integration/test_schema.php
+
+      - name: Test login
+        run: php test/integration/test_login.php
+
+      - name: Test estados
+        run: php test/integration/test_estados.php
+
+      - name: Test insertar envio
+        run: php test/integration/test_insert_envio.php
+
+      - name: Test tracking
+        run: php test/integration/test_tracking.php
+
+      - name: Todos los tests OK
+        run: echo "TESTS EXITOSOS"
+
+  artifact:
+    name: Generar artifact
+    runs-on: ubuntu-latest
+
+    needs: tests
+
+    steps:
+
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Crear ZIP deploy
+        run: |
+          zip -r sistema_envios_build.zip . \
+          -x "*.git*" \
+          -x "vendor/*"
+
+      - name: Subir artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sistema-envios-build
+          path: sistema_envios_build.zip
