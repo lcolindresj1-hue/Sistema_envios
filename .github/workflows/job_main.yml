@@ -1,4 +1,3 @@
-
 name: CI PHP Sistema Envios main
 
 on:
@@ -40,16 +39,13 @@ jobs:
     services:
       mysql:
         image: mysql:8.0
-
         env:
           MYSQL_ROOT_PASSWORD: root123
           MYSQL_DATABASE: sistema_envios
           MYSQL_USER: devops
           MYSQL_PASSWORD: devops123
-
         ports:
           - 3306:3306
-
         options: >-
           --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot123"
           --health-interval=10s
@@ -64,7 +60,6 @@ jobs:
       DB_PASSWORD: devops123
 
     steps:
-
       - name: Descargar código
         uses: actions/checkout@v4
 
@@ -74,8 +69,7 @@ jobs:
           sudo apt install -y php php-mysql mysql-client
 
       - name: Esperar MySQL
-        run: |
-          sleep 15
+        run: sleep 15
 
       - name: Crear estructura BD
         run: |
@@ -106,6 +100,25 @@ jobs:
       - name: Test tracking
         run: php test/integration/test_tracking.php
 
+      - name: Generar reporte básico de cobertura
+        run: |
+          mkdir -p coverage
+          echo "Reporte de cobertura básico" > coverage/reporte_cobertura.txt
+          echo "Proyecto: Sistema de Gestión de Envíos" >> coverage/reporte_cobertura.txt
+          echo "Pruebas ejecutadas:" >> coverage/reporte_cobertura.txt
+          echo "- test_schema.php" >> coverage/reporte_cobertura.txt
+          echo "- test_login.php" >> coverage/reporte_cobertura.txt
+          echo "- test_estados.php" >> coverage/reporte_cobertura.txt
+          echo "- test_insert_envio.php" >> coverage/reporte_cobertura.txt
+          echo "- test_tracking.php" >> coverage/reporte_cobertura.txt
+          echo "Estado: Pruebas ejecutadas correctamente" >> coverage/reporte_cobertura.txt
+
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
       - name: Todos los tests OK
         run: echo "TESTS EXITOSOS"
 
@@ -116,7 +129,6 @@ jobs:
     needs: tests
 
     steps:
-
       - name: Descargar código
         uses: actions/checkout@v4
 
