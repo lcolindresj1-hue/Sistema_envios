@@ -27,7 +27,7 @@ $acceso = false;
 
 if ($usuario) {
     $hash = $usuario['password_hash'];
-    $acceso = password_verify($password, $hash) || $password === $hash;
+    $acceso = password_verify($password, $hash);
 }
 
 if ($acceso) {
