@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../config/conexion.php';
+require_once __DIR__ . '/../../config/conexion_test.php';
 
 echo "====================================\n";
 echo "TEST LOGIN ADMIN\n";
