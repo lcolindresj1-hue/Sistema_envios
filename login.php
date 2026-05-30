@@ -20,7 +20,7 @@ if (isset($_SESSION['id_usuario'])) {
     <section class="login-brand">
         <div class="icon"><i class="bi bi-truck"></i></div>
         <h1>Sistema de Envíos</h1>
-        <p>Gestión de paquetería, solicitudes y tracking en tiempo real desde una plataforma moderna.</p>
+        <p>Gestión de paquetería, solicitudes y tracking en tiempo real desde.</p>
     </section>
     <section class="login-card">
         <h3>Iniciar sesión</h3>
